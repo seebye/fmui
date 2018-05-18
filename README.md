@@ -116,4 +116,3 @@ key_bindings+=(
 ![song info screen](media/2.png)
 ![cava](media/3.png)
 
-~TODO~
