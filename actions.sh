@@ -42,30 +42,30 @@ function key_hook {
                 # the created input shell to avoid this bug.
                 [[ "$INPUT_SHELL_PID" != "" ]] && 
                     kill $INPUT_SHELL_PID &> /dev/null
-                exit
+                break
             fi
         fi
     done
 }
 
 
-ACTION_QUIT='abort'
-ACTION_RESTART='accept'
-ACTION_UPDATE_PREVIEW="toggle-preview+toggle-preview"
-ACTION_UPDATE_DB="execute-silent(mpc update --wait)+$ACTION_RESTART"
-ACTION_UP='up'
-ACTION_DOWN='down'
-ACTION_SHUFFLE="execute(mpc shuffle)+$ACTION_RESTART"
-ACTION_SEEK_BACKWARDS="execute-silent:mpc seek -${SEEK_STEP:-${DEFAULT_SEEK_STEP}}"
-ACTION_SEEK_FORWARDS="execute-silent:mpc seek +${SEEK_STEP:-${DEFAULT_SEEK_STEP}}"
-ACTION_SEEK_CUSTOM="execute:clear 1>&2; read step <`tty` ; mpc seek \$step"
-ACTION_PREV_SONG='execute-silent:mpc prev'
-ACTION_NEXT_SONG='execute-silent:mpc next'
-ACTION_PLAY_CHOICE='execute-silent:mpc play {1}'
-ACTION_TOGGLE_PLAY='execute-silent:mpc toggle'
-ACTION_TOGGLE_CONSUME="execute-silent(mpc consume)+$ACTION_UPDATE_PREVIEW"
-ACTION_TOGGLE_SINGLE="execute-silent(mpc single)+$ACTION_UPDATE_PREVIEW"
-ACTION_TOGGLE_RANDOM="execute-silent(mpc random)+$ACTION_UPDATE_PREVIEW"
-ACTION_TOGGLE_REPEAT="execute-silent(mpc repeat)+$ACTION_UPDATE_PREVIEW"
-ACTION_VISUALIZER="execute(bash -c 'key_hook < <(<`tty`) | ${VISUALIZER:-$DEFAULT_VISUALIZER}' 1>&2)"
-ACTION_INFO="execute(bash -c 'key_hook n | main_song_info' <`tty` 1>&2)"
+readonly ACTION_QUIT='abort'
+readonly ACTION_RESTART='accept'
+readonly ACTION_UPDATE_PREVIEW="toggle-preview+toggle-preview"
+readonly ACTION_UPDATE_DB="execute-silent(mpc update --wait)+$ACTION_RESTART"
+readonly ACTION_UP='up'
+readonly ACTION_DOWN='down'
+readonly ACTION_SHUFFLE="execute(mpc shuffle)+$ACTION_RESTART"
+readonly ACTION_SEEK_BACKWARDS="execute-silent:mpc seek -${seek_step:-${DEFAULT_SEEK_STEP}}"
+readonly ACTION_SEEK_FORWARDS="execute-silent:mpc seek +${seek_step:-${DEFAULT_SEEK_STEP}}"
+readonly ACTION_SEEK_CUSTOM="execute:clear 1>&2; read step <`tty` ; mpc seek \$step"
+readonly ACTION_PREV_SONG='execute-silent:mpc prev'
+readonly ACTION_NEXT_SONG='execute-silent:mpc next'
+readonly ACTION_PLAY_CHOICE='execute-silent:mpc play {1}'
+readonly ACTION_TOGGLE_PLAY='execute-silent:mpc toggle'
+readonly ACTION_TOGGLE_CONSUME="execute-silent(mpc consume)+$ACTION_UPDATE_PREVIEW"
+readonly ACTION_TOGGLE_SINGLE="execute-silent(mpc single)+$ACTION_UPDATE_PREVIEW"
+readonly ACTION_TOGGLE_RANDOM="execute-silent(mpc random)+$ACTION_UPDATE_PREVIEW"
+readonly ACTION_TOGGLE_REPEAT="execute-silent(mpc repeat)+$ACTION_UPDATE_PREVIEW"
+readonly ACTION_VISUALIZER="execute(bash -c 'key_hook < <(<`tty`) | ${visualizer:-$DEFAULT_VISUALIZER}' 1>&2)"
+readonly ACTION_INFO="execute(bash -c 'key_hook n | main_song_info' <`tty` 1>&2)"

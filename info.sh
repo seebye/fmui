@@ -50,7 +50,7 @@ function clean_up {
 
 
 function get_song_name {
-    mpc current --format "${SONG_FORMAT:-${DEFAULT_SONG_FORMAT}}"
+    mpc current --format "${song_format:-${DEFAULT_SONG_FORMAT}}"
 }
 
 

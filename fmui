@@ -35,11 +35,12 @@ readonly DEFAULT_SEEK_STEP='00:00:10'
 # https://github.com/dpayne/cli-visualizer
 readonly DEFAULT_VISUALIZER='cava || vis'
 readonly DEFAULT_MOD='ctrl'
+readonly DEFAULT_FILL_QUEUE=true
+readonly DEFAULT_CLEAR_QUEUE=false
 
-readonly IDENTIFIER_GLOBAL_CMD="execute-silent:"
+readonly PATTERN_OUTER_BRACKETS='\(([^()]|(?R))*\)'
+readonly IDENTIFIER_GLOBAL_CMD="execute-silent"
 
-declare on_start_fill_queue=true
-declare on_start_clear_queue=false
 declare $ARRAY key_bindings_args
 declare $MAP key_bindings
 declare $MAP key_bindings_global
@@ -66,16 +67,25 @@ for key in ${!key_bindings[@]}; do
     if [[ ${#key} == 1 &&
             "${key_bindings[$key]}" == "$IDENTIFIER_GLOBAL_CMD"* &&
             "${key_bindings[$key]}" != *"{"*"}"* ]]; then
-        key_bindings_global+=(["${key}"]="${key_bindings[$key]:${#IDENTIFIER_GLOBAL_CMD}}")
-        export key_bindings_global_`ord $key`="${key_bindings[$key]:${#IDENTIFIER_GLOBAL_CMD}}"
+        data="${key_bindings[$key]:${#IDENTIFIER_GLOBAL_CMD}}"
+        cmd="${data:1}"
+
+        if [[ "${data:0:1}" == '(' ]]; then
+            cmd=`grep --only-matching --perl-regexp "$PATTERN_OUTER_BRACKETS" <<<"$data" |
+                        head --lines 1`
+            cmd="${cmd:1:-1}"
+        fi
+
+        key_bindings_global+=(["${key}"]="$cmd")
+        export key_bindings_global_`ord $key`="$cmd"
     fi
 done
 
 
 function tui {
-    mpc playlist --format "%position%. ${SONG_LIST_FORMAT:-$DEFAULT_SONG_LIST_FORMAT}" | \
-        fzf --no-multi --prompt "${PROMPT:-$DEFAULT_PROMPT}" --delimiter '\.' \
-            --preview "${PREVIEW:-$DEFAULT_PREVIEW}" \
+    mpc playlist --format "%position%. ${song_list_format:-$DEFAULT_SONG_LIST_FORMAT}" | \
+        fzf --no-multi --prompt "${prompt:-$DEFAULT_PROMPT}" --delimiter '\.' \
+            --preview "${preview:-$DEFAULT_PREVIEW}" \
             --preview-window 'up:1' \
             "${fzf_options[@]}" \
             "${key_bindings_args[@]}" > /dev/null
@@ -99,8 +109,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # The exitcode will only be zero if a reload was requested.
     while
         # do
-        $on_start_clear_queue && clear-queue
-        $on_start_fill_queue && update-queue
+        ${clear_queue:-${DEFAULT_CLEAR_QUEUE}} && clear-queue
+        ${fill_queue:-${DEFAULT_FILL_QUEUE}} && update-queue
         # while
         tui
     do continue ; done
