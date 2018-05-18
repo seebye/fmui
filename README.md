@@ -57,7 +57,6 @@ Commands starting with 'execute-silent' bound to a single char are useable in su
 | down   | Go down                         |            |
 | up     | Go up                           |            |
 | return | Play choice                     |            |
-| space  | Play choice                     |            |
 | mod-r  | Toggle repeat                   |            |
 | mod-s  | Shuffle                         |            |
 | mod-d  | Update mpd database, restart    |            |
