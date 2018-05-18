@@ -87,7 +87,7 @@ function build_ascii_art {
         IFS=$'\n' ascii_art_char=($(toilet -f future -w $width <<< "$char" ))
 
         if ! [[ "$char" =~ [a-zA-Z0-9\ ÄÖÜäöüß\"\$\(\)*+/:\;=@?_\`\|\&{}-] ]] ||
-             [[ "$char" == ' ' && ( "$last_char" == ' ' && "$last_char" == '' ) ]]; then
+             [[ "$char" == ' ' && ( "$last_char" == ' ' || "$last_char" == '' ) ]]; then
                 continue
         fi
 
