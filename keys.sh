@@ -28,7 +28,6 @@ key_bindings+=(
     [left]="$ACTION_SEEK_BACKWARDS"
     [right]="$ACTION_SEEK_FORWARDS"
     [return]="$ACTION_PLAY_CHOICE"
-    [space]="$ACTION_PLAY_CHOICE"
     [p]="$ACTION_TOGGLE_PLAY"
     ['<']="$ACTION_PREV_SONG"
     ['>']="$ACTION_NEXT_SONG"
