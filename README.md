@@ -5,6 +5,7 @@ Warning: FMUI will add every song to your queue by default.
 
 ## Overview
 
+- [Unofficial aur package](#unofficial-aur-package)
 - [Required uncommon programs](#required-uncommon-programs)
 - [Config](#config)
   * [General configuration](#general-configuration)
@@ -13,6 +14,10 @@ Warning: FMUI will add every song to your queue by default.
     - [Keybindings example](#keybindings-example)
 - [Visualizer](#visualizer)
 - [Screenshots](#screenshots)
+
+## Unofficial aur package
+
+[fmui-git](https://aur.archlinux.org/packages/fmui-git/)
 
 ## Required uncommon programs
 
