@@ -55,7 +55,7 @@ function get_song_name {
 
 
 function get_song_info {
-    mpc | grep '] #'
+    mpc | grep --perl-regexp ']\s*#'
 }
 
 
