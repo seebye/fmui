@@ -55,7 +55,7 @@ function get_song_name {
 
 
 function get_song_info {
-    mpc | tail -n 2 | head -n 1
+    mpc | grep '] #'
 }
 
 

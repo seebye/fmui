@@ -28,7 +28,7 @@ readonly FILE_KEYBINDINGS="$DIR_CONFIG/keybindings"
 
 readonly DEFAULT_SONG_FORMAT='[[[%artist% - ]%title%]|[%file%]]'
 readonly DEFAULT_SONG_LIST_FORMAT="%time% [[[%artist% - ]%title%]|[%file%]]"
-readonly DEFAULT_PREVIEW='mpc | tail -n 1'
+readonly DEFAULT_PREVIEW='mpc | grep "volume" | head -n 1'
 readonly DEFAULT_PROMPT=''
 readonly DEFAULT_SEEK_STEP='00:00:10'
 # https://github.com/karlstav/cava
