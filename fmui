@@ -96,7 +96,7 @@ function update-queue {
     # adds every song to the queue if it's not already part of it
     diff --unchanged-group-format="" --new-group-format="%>" \
         <(mpc playlist | sort) <(mpc ls | sort) | \
-        mpc add
+        mpc add &>/dev/null
 }
 
 
