@@ -12,6 +12,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+source "$PROJECT_ROOT/essentials.sh"
+lazy_declare FMUI_KEYS_SH || return
+source "$PROJECT_ROOT/defaults.sh"
+source "$PROJECT_ROOT/actions.sh"
 
 mod="${mod:-$DEFAULT_MOD}"
 

@@ -15,29 +15,18 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 set -a # export everything
-readonly PROJECT_ROOT=$(dirname `readlink -f "${BASH_SOURCE[0]}"`)
+readonly PROJECT_ROOT=$(dirname `readlink --canonicalize "${BASH_SOURCE[0]}"`)
 
-readonly GLOBAL='-g'
-readonly ARRAY='-a'
-readonly MAP='-A'
-readonly IS_FILE='-f'
+source "$PROJECT_ROOT/essentials.sh"
+source "$PROJECT_ROOT/defaults.sh"
 
-readonly DIR_CONFIG="$HOME/.config/fmui"
-readonly FILE_CONFIG="$DIR_CONFIG/config"
-readonly FILE_KEYBINDINGS="$DIR_CONFIG/keybindings"
 
-readonly DEFAULT_SONG_FORMAT='[[[%artist% - ]%title%]|[%file%]]'
-readonly DEFAULT_SONG_LIST_FORMAT="%time% [[[%artist% - ]%title%]|[%file%]]"
-readonly DEFAULT_PREVIEW='mpc | grep "volume" | head -n 1'
-readonly DEFAULT_PROMPT=''
-readonly DEFAULT_SEEK_STEP='00:00:10'
-# https://github.com/karlstav/cava
-# https://github.com/dpayne/cli-visualizer
-readonly DEFAULT_VISUALIZER='cava || vis'
-readonly DEFAULT_MOD='ctrl'
-readonly DEFAULT_FILL_QUEUE=true
-readonly DEFAULT_CLEAR_QUEUE=false
-
+readonly SUPPORTED_UEBERZUG=`{
+    type ueberzug &&
+    { type ffmpeg || type avconv ; } &&
+    { type ffprobe || type avprobe ; } &&
+    type file
+} &>/dev/null`$?
 readonly PATTERN_OUTER_BRACKETS='\(([^()]|(?R))*\)'
 readonly IDENTIFIER_GLOBAL_CMD="execute-silent"
 
@@ -48,11 +37,24 @@ declare $ARRAY fzf_options=(
     --cycle
     # case-insensitive match
     -i
+    --inline-info
 )
 
 [ $IS_FILE "$FILE_CONFIG" ] &&
     source "$FILE_CONFIG"
 
+if (( $SUPPORTED_UEBERZUG == 0 )) && 
+    [ $IS_DIRECTORY "$DIR_MUSIC" ]; then
+    readonly PREVIEW_BOX_POSITION='right'
+    preview_box_size="${preview_box_size:-$DEFAULT_PREVIEW_BOX_SIZE_COVER}"
+    preview="${preview:-$DEFAULT_PREVIEW_COVER}"
+    margin="${margin:-0,0,0,$((${cover_max_columns:-$DEFAULT_COVER_MAX_COLUMNS} + 1))}"
+else
+    readonly PREVIEW_BOX_POSITION='top'
+fi
+
+source "$PROJECT_ROOT/cover.sh"
+source "$PROJECT_ROOT/mpc.sh"
 source "$PROJECT_ROOT/info.sh"
 source "$PROJECT_ROOT/actions.sh"
 source "$PROJECT_ROOT/keys.sh"
@@ -60,58 +62,66 @@ source "$PROJECT_ROOT/keys.sh"
 [ $IS_FILE "$FILE_KEYBINDINGS" ] &&
     source "$FILE_KEYBINDINGS"
 
-for key in ${!key_bindings[@]}; do
-    # build key binding command line arguments
-    key_bindings_args+=('--bind' "${key}:${key_bindings[$key]}")
 
-    if [[ ${#key} == 1 &&
-            "${key_bindings[$key]}" == "$IDENTIFIER_GLOBAL_CMD"* &&
-            "${key_bindings[$key]}" != *"{"*"}"* ]]; then
-        data="${key_bindings[$key]:${#IDENTIFIER_GLOBAL_CMD}}"
-        cmd="${data:1}"
+function Fmui::initialise_keybindings {
+    for key in ${!key_bindings[@]}; do
+        # build key binding command line arguments
+        key_bindings_args+=('--bind' "${key}:${key_bindings[$key]}")
 
-        if [[ "${data:0:1}" == '(' ]]; then
-            cmd=`grep --only-matching --perl-regexp "$PATTERN_OUTER_BRACKETS" <<<"$data" |
-                        head --lines 1`
-            cmd="${cmd:1:-1}"
+        if [[ ${#key} == 1 &&
+                "${key_bindings[$key]}" == "$IDENTIFIER_GLOBAL_CMD"* &&
+                "${key_bindings[$key]}" != *"{"*"}"* ]]; then
+            data="${key_bindings[$key]:${#IDENTIFIER_GLOBAL_CMD}}"
+            cmd="${data:1}"
+
+            if [[ "${data:0:1}" == '(' ]]; then
+                cmd=`grep --only-matching --perl-regexp "$PATTERN_OUTER_BRACKETS" <<<"$data" |
+                            head --lines 1`
+                cmd="${cmd:1:-1}"
+            fi
+
+            key_bindings_global+=(["${key}"]="$cmd")
+            export key_bindings_global_`ord $key`="$cmd"
         fi
-
-        key_bindings_global+=(["${key}"]="$cmd")
-        export key_bindings_global_`ord $key`="$cmd"
-    fi
-done
+    done
+}
 
 
-function tui {
-    mpc playlist --format "%position%. ${song_list_format:-$DEFAULT_SONG_LIST_FORMAT}" | \
+function Fmui::cleanup {
+    Cover::stop_ueberzug 
+}
+
+
+function Fmui::tui {
+    Cover::stop_ueberzug 
+    (( $SUPPORTED_UEBERZUG == 0 )) && \
+        Cover::start_ueberzug
+
+    Mpc::get_playlist | \
         fzf --no-multi --prompt "${prompt:-$DEFAULT_PROMPT}" --delimiter '\.' \
             --preview "${preview:-$DEFAULT_PREVIEW}" \
-            --preview-window 'up:1' \
+            --margin "${margin:-$DEFAULT_MARGIN}" \
+            --preview-window "${PREVIEW_BOX_POSITION}:${preview_box_size:-$DEFAULT_PREVIEW_BOX_SIZE}" \
             "${fzf_options[@]}" \
             "${key_bindings_args[@]}" > /dev/null
 }
 
 
-function update-queue {
-    # adds every song to the queue if it's not already part of it
-    diff --unchanged-group-format="" --new-group-format="%>" \
-        <(mpc playlist | sort) <(mpc ls | sort) | \
-        mpc add &>/dev/null
-}
+function Fmui::main {
+    trap "Fmui::cleanup" EXIT
+    Fmui::initialise_keybindings
 
-
-function clear-queue {
-    mpc clear &>/dev/null
+    # The exitcode will only be zero if a reload was requested.
+    while
+        # do
+        ${clear_queue:-${DEFAULT_CLEAR_QUEUE}} && Mpc::clear-queue
+        ${fill_queue:-${DEFAULT_FILL_QUEUE}} && Mpc::update-queue
+        # while
+        Fmui::tui
+    do continue ; done
 }
 
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    # The exitcode will only be zero if a reload was requested.
-    while
-        # do
-        ${clear_queue:-${DEFAULT_CLEAR_QUEUE}} && clear-queue
-        ${fill_queue:-${DEFAULT_FILL_QUEUE}} && update-queue
-        # while
-        tui
-    do continue ; done
+    Fmui::main
 fi

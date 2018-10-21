@@ -12,63 +12,43 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+source "$PROJECT_ROOT/essentials.sh"
+lazy_declare FMUI_INFO_SH || return
 
-function move_cursor {
+
+function Screen::move_cursor {
     tput cup "$@"
 }
 
 
-function foreground {
+function Screen::set_foreground {
     tput setaf "$@"
 }
 
 
-function hide_cursor {
+function Screen::hide_cursor {
     tput civis
 }
 
 
-function show_cursor {
+function Screen::show_cursor {
     tput cnorm
 }
 
 
-function new_screen {
+function Screen::new_screen {
     tput smcup
 }
 
 
-function restore_screen {
+function Screen::restore_screen {
     tput rmcup
 }
 
 
-function clean_up {
-    show_cursor
-    restore_screen
-}
-
-
-function get_song_name {
-    mpc current --format "${song_format:-${DEFAULT_SONG_FORMAT}}"
-}
-
-
-function get_song_info {
-    mpc | grep --perl-regexp ']\s*#'
-}
-
-
-function get_song_progress {
-    get_song_info | grep -oP '(?<=\()[0-9]+(?=%)'
-}
-
-
-function get_song_duration {
-    local duration=`mpc current --format "%time%"`
-    local seconds=$(( $(( `grep -oP '([0-9]+)(?=:)' <<< "$duration"` * 60 )) +
-                      `grep -oP '(?<=:)([0-9]+)' <<< "$duration"` ))
-    echo -n "${seconds:-1}"
+function cleanup {
+    Screen::show_cursor
+    Screen::restore_screen
 }
 
 
@@ -84,7 +64,7 @@ function build_ascii_art {
 
     for (( i=0; i<${#name}; i++ )); do
         char="${name:$i:1}"
-        IFS=$'\n' ascii_art_char=($(toilet -f future -w $width <<< "$char" ))
+        IFS=$'\n' ascii_art_char=($(toilet --font future --width $width <<< "$char" ))
 
         if ! [[ "$char" =~ [a-zA-Z0-9\ ÄÖÜäöüß\"\$\(\)*+/:\;=@?_\`\|\&{}-] ]] ||
              [[ "$char" == ' ' && ( "$last_char" == ' ' || "$last_char" == '' ) ]]; then
@@ -114,15 +94,15 @@ function main_song_info {
     local offset_x offset_y offset_x_normal
     local timeout timeout_seconds timeout_millisecs
     local progress
-    local timeout=$(( `get_song_duration` / 100 ))
+    local timeout=$(( `Mpc::get_song_duration` / 100 ))
 
-    trap "clean_up" EXIT
-    new_screen
-    hide_cursor
+    trap "cleanup" EXIT
+    Screen::new_screen
+    Screen::hide_cursor
 
     while
         # do
-        current_song="`get_song_name`"
+        current_song="`Mpc::get_song_name`"
 
         if [[ "$current_song" != "$last_song" ]]; then
             last_song="$current_song"
@@ -132,7 +112,7 @@ function main_song_info {
             offset_y=$(( `tput lines` / 2 - ${#song[@]} / 2 ))
             #offset_x_normal=$(( `tput cols` / 2 - ${#current_song} / 2 ))
 
-            timeout_millisecs=$(( MILLISECS_PER_SECOND * `get_song_duration` / ${#song[0]} ))
+            timeout_millisecs=$(( MILLISECS_PER_SECOND * `Mpc::get_song_duration` / ${#song[0]} ))
             timeout_seconds=$(( timeout_millisecs / MILLISECS_PER_SECOND ))
             timeout_millisecs=$(( timeout_millisecs % MILLISECS_PER_SECOND ))
             timeout="${timeout_seconds}.${timeout_millisecs}"
@@ -140,20 +120,20 @@ function main_song_info {
             clear
         fi
         
-        progress=$(( ${#song[0]} * `get_song_progress` / 100 ))
+        progress=$(( ${#song[0]} * `Mpc::get_song_progress` / 100 ))
 
         for (( y=0; y<${#song[@]}; y++ )); do
             local line="${song[$y]}"
-            move_cursor $(( offset_y + y )) $offset_x
+            Screen::move_cursor $(( offset_y + y )) $offset_x
 
-            foreground $COLOR_PLAYED
+            Screen::set_foreground $COLOR_PLAYED
             echo -n "${line:0:$progress}"
-            foreground $COLOR_OUTSTANDING
+            Screen::set_foreground $COLOR_OUTSTANDING
             echo -n "${line:$progress:${#line}}"
         done
         
-        move_cursor $(( offset_y + ${#song[@]} )) $offset_x
-        foreground $COLOR_NORMAL
+        Screen::move_cursor $(( offset_y + ${#song[@]} )) $offset_x
+        Screen::set_foreground $COLOR_NORMAL
         echo "$current_song"
 
         # while
@@ -161,5 +141,5 @@ function main_song_info {
         [[ "$input_char" != "q" ]]
     do continue ; done
 
-    clean_up
+    cleanup
 }
