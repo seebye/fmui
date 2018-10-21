@@ -126,6 +126,7 @@ key_bindings+=(
 ## Screenshots
 
 [![fzf song list](media/1.png)](media/1.png?raw=true)
+[![fzf song list with cover](media/4.png)](media/4.png?raw=true)
 [![song info screen](media/2.png)](media/2.png?raw=true)
 [![cava](media/3.png)](media/3.png?raw=true)
 
