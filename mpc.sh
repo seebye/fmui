@@ -60,7 +60,7 @@ function Mpc::get_playlist_filename {
 function Mpc::update-queue {
     # adds every song to the queue if it's not already part of it
     diff --unchanged-group-format="" --new-group-format="%>" \
-        <(mpc playlist | sort) <(mpc ls | sort) | \
+        <(mpc playlist --format '%file%' | sort) <(mpc ls --format '%file%' | sort) | \
         mpc add &>/dev/null
 }
 
