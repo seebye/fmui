@@ -56,7 +56,7 @@ function key_hook {
 readonly ACTION_QUIT='abort'
 readonly ACTION_RESTART='accept'
 readonly ACTION_UPDATE_PREVIEW="toggle-preview+toggle-preview"
-readonly ACTION_HIDE_COVER="execute-silent(bash -c 'Cover::if_running remove_image')"
+readonly ACTION_HIDE_COVER="execute-silent(Cover::if_running remove_image)"
 readonly ACTION_UPDATE_DB="execute-silent(mpc update --wait)+$ACTION_RESTART"
 readonly ACTION_UP='up'
 readonly ACTION_DOWN='down'
@@ -72,5 +72,5 @@ readonly ACTION_TOGGLE_CONSUME="execute-silent(mpc consume)+$ACTION_UPDATE_PREVI
 readonly ACTION_TOGGLE_SINGLE="execute-silent(mpc single)+$ACTION_UPDATE_PREVIEW"
 readonly ACTION_TOGGLE_RANDOM="execute-silent(mpc random)+$ACTION_UPDATE_PREVIEW"
 readonly ACTION_TOGGLE_REPEAT="execute-silent(mpc repeat)+$ACTION_UPDATE_PREVIEW"
-readonly ACTION_VISUALIZER="$ACTION_HIDE_COVER+execute(bash -c 'key_hook < <(<`tty`) | ${visualizer:-$DEFAULT_VISUALIZER}' 1>&2)+$ACTION_UPDATE_PREVIEW"
-readonly ACTION_INFO="$ACTION_HIDE_COVER+execute(bash -c 'key_hook n | main_song_info' <`tty` 1>&2)+$ACTION_UPDATE_PREVIEW"
+readonly ACTION_VISUALIZER="$ACTION_HIDE_COVER+execute({ key_hook < <(<`tty`) | ${visualizer:-$DEFAULT_VISUALIZER}; } 1>&2)+$ACTION_UPDATE_PREVIEW"
+readonly ACTION_INFO="$ACTION_HIDE_COVER+execute({ key_hook n | main_song_info; } <`tty` 1>&2)+$ACTION_UPDATE_PREVIEW"

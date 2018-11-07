@@ -98,12 +98,13 @@ function Fmui::tui {
         Cover::start_ueberzug
 
     Mpc::get_playlist | \
-        fzf --no-multi --prompt "${prompt:-$DEFAULT_PROMPT}" --delimiter '\.' \
-            --preview "${preview:-$DEFAULT_PREVIEW}" \
-            --margin "${margin:-$DEFAULT_MARGIN}" \
-            --preview-window "${PREVIEW_BOX_POSITION}:${preview_box_size:-$DEFAULT_PREVIEW_BOX_SIZE}" \
-            "${fzf_options[@]}" \
-            "${key_bindings_args[@]}" > /dev/null
+        SHELL="$BASH_BINARY" \
+            fzf --no-multi --prompt "${prompt:-$DEFAULT_PROMPT}" --delimiter '\.' \
+                --preview "${preview:-$DEFAULT_PREVIEW}" \
+                --margin "${margin:-$DEFAULT_MARGIN}" \
+                --preview-window "${PREVIEW_BOX_POSITION}:${preview_box_size:-$DEFAULT_PREVIEW_BOX_SIZE}" \
+                "${fzf_options[@]}" \
+                "${key_bindings_args[@]}" > /dev/null
 }
 
 
