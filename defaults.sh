@@ -21,7 +21,7 @@ readonly DIR_CONFIG="$HOME/.config/fmui"
 readonly DIR_CACHE="$HOME/.cache/fmui"
 readonly FILE_CONFIG="$DIR_CONFIG/config"
 readonly FILE_KEYBINDINGS="$DIR_CONFIG/keybindings"
-readonly BASH_BINARY="`which bash`"
+readonly BINARY_BASH="`which bash`"
 
 readonly DEFAULT_SONG_FORMAT='[[[%artist% - ]%title%]|[%file%]]'
 readonly DEFAULT_SONG_LIST_FORMAT="%time% [[[%artist% - ]%title%]|[%file%]]"

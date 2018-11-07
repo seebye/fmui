@@ -98,7 +98,7 @@ function Fmui::tui {
         Cover::start_ueberzug
 
     Mpc::get_playlist | \
-        SHELL="$BASH_BINARY" \
+        SHELL="$BINARY_BASH" \
             fzf --no-multi --prompt "${prompt:-$DEFAULT_PROMPT}" --delimiter '\.' \
                 --preview "${preview:-$DEFAULT_PREVIEW}" \
                 --margin "${margin:-$DEFAULT_MARGIN}" \
