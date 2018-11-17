@@ -43,7 +43,7 @@ function Mpc::get_song_name {
 
 
 function Mpc::get_options {
-    mpc | grep "volume" | head --lines 1
+    mpc | grep "volume" | sed 's|:\([^ ]\)|: \1|' | head --lines 1
 }
 
 
