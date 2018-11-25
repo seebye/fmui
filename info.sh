@@ -92,7 +92,7 @@ function main_song_info {
     declare $GLOBAL $ARRAY song=('' '' '')
     local current_song last_song
     local offset_x offset_y offset_x_normal
-    local timeout timeout_seconds timeout_millisecs
+    local timeout=1 timeout_seconds timeout_millisecs
     local progress
     local timeout=$(( `Mpc::get_song_duration` / 100 ))
 
@@ -104,37 +104,39 @@ function main_song_info {
         # do
         current_song="`Mpc::get_song_name`"
 
-        if [[ "$current_song" != "$last_song" ]]; then
-            last_song="$current_song"
-            build_ascii_art "$current_song"
+        if [[ ! -z "$current_song" ]]; then
+            if [[ "$current_song" != "$last_song" ]]; then
+                last_song="$current_song"
+                build_ascii_art "$current_song"
 
-            offset_x=$(( `tput cols` / 2 - ${#song[0]} / 2 ))
-            offset_y=$(( `tput lines` / 2 - ${#song[@]} / 2 ))
-            #offset_x_normal=$(( `tput cols` / 2 - ${#current_song} / 2 ))
+                offset_x=$(( `tput cols` / 2 - ${#song[0]} / 2 ))
+                offset_y=$(( `tput lines` / 2 - ${#song[@]} / 2 ))
+                #offset_x_normal=$(( `tput cols` / 2 - ${#current_song} / 2 ))
 
-            timeout_millisecs=$(( MILLISECS_PER_SECOND * `Mpc::get_song_duration` / ${#song[0]} ))
-            timeout_seconds=$(( timeout_millisecs / MILLISECS_PER_SECOND ))
-            timeout_millisecs=$(( timeout_millisecs % MILLISECS_PER_SECOND ))
-            timeout="${timeout_seconds}.${timeout_millisecs}"
+                timeout_millisecs=$(( MILLISECS_PER_SECOND * `Mpc::get_song_duration` / ${#song[0]} ))
+                timeout_seconds=$(( timeout_millisecs / MILLISECS_PER_SECOND ))
+                timeout_millisecs=$(( timeout_millisecs % MILLISECS_PER_SECOND ))
+                timeout="${timeout_seconds}.${timeout_millisecs}"
 
-            clear
+                clear
+            fi
+        
+            progress=$(( ${#song[0]} * `Mpc::get_song_progress` / 100 ))
+
+            for (( y=0; y<${#song[@]}; y++ )); do
+                local line="${song[$y]}"
+                Screen::move_cursor $(( offset_y + y )) $offset_x
+
+                Screen::set_foreground $COLOR_PLAYED
+                echo -n "${line:0:$progress}"
+                Screen::set_foreground $COLOR_OUTSTANDING
+                echo -n "${line:$progress:${#line}}"
+            done
+        
+            Screen::move_cursor $(( offset_y + ${#song[@]} )) $offset_x
+            Screen::set_foreground $COLOR_NORMAL
+            echo "$current_song"
         fi
-        
-        progress=$(( ${#song[0]} * `Mpc::get_song_progress` / 100 ))
-
-        for (( y=0; y<${#song[@]}; y++ )); do
-            local line="${song[$y]}"
-            Screen::move_cursor $(( offset_y + y )) $offset_x
-
-            Screen::set_foreground $COLOR_PLAYED
-            echo -n "${line:0:$progress}"
-            Screen::set_foreground $COLOR_OUTSTANDING
-            echo -n "${line:$progress:${#line}}"
-        done
-        
-        Screen::move_cursor $(( offset_y + ${#song[@]} )) $offset_x
-        Screen::set_foreground $COLOR_NORMAL
-        echo "$current_song"
 
         # while
         read -rsn 1 -t $timeout input_char
