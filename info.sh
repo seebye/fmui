@@ -47,7 +47,18 @@ function Screen::restore_screen {
 }
 
 
+function Screen::enable_echo {
+    stty echo
+}
+
+
+function Screen::disable_echo {
+    stty -echo
+}
+
+
 function Info::cleanup {
+    Screen::enable_echo
     Screen::show_cursor
     Screen::restore_screen
 }
@@ -100,6 +111,7 @@ function Info::main {
     trap "Info::cleanup" EXIT
     Screen::new_screen
     Screen::hide_cursor
+    Screen::disable_echo
 
     while
         # do
