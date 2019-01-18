@@ -108,6 +108,7 @@ function Info::main {
     local progress
     local timeout=$(( `Mpc::get_song_duration` / 100 ))
 
+    trap "last_song=''" WINCH
     trap "Info::cleanup" EXIT
     Screen::new_screen
     Screen::hide_cursor
