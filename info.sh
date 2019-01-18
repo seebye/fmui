@@ -14,6 +14,7 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 source "$PROJECT_ROOT/essentials.sh"
 lazy_declare FMUI_INFO_SH || return
+source "$PROJECT_ROOT/mpc.sh"
 
 
 function Screen::move_cursor {
@@ -46,7 +47,7 @@ function Screen::restore_screen {
 }
 
 
-function cleanup {
+function Info::cleanup {
     Screen::show_cursor
     Screen::restore_screen
 }
@@ -84,7 +85,7 @@ function build_ascii_art {
 }
 
 
-function main_song_info {
+function Info::main {
     readonly MILLISECS_PER_SECOND=1000
     readonly COLOR_PLAYED=15
     readonly COLOR_OUTSTANDING=8
@@ -96,7 +97,7 @@ function main_song_info {
     local progress
     local timeout=$(( `Mpc::get_song_duration` / 100 ))
 
-    trap "cleanup" EXIT
+    trap "Info::cleanup" EXIT
     Screen::new_screen
     Screen::hide_cursor
 
@@ -143,5 +144,5 @@ function main_song_info {
         [[ "$input_char" != "q" ]]
     do continue ; done
 
-    cleanup
+    Info::cleanup
 }

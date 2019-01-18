@@ -73,4 +73,5 @@ readonly ACTION_TOGGLE_SINGLE="execute-silent(mpc single)+$ACTION_UPDATE_PREVIEW
 readonly ACTION_TOGGLE_RANDOM="execute-silent(mpc random)+$ACTION_UPDATE_PREVIEW"
 readonly ACTION_TOGGLE_REPEAT="execute-silent(mpc repeat)+$ACTION_UPDATE_PREVIEW"
 readonly ACTION_VISUALIZER="$ACTION_HIDE_COVER+execute({ key_hook < <(<`tty`) | ${visualizer:-$DEFAULT_VISUALIZER}; } 1>&2)+$ACTION_UPDATE_PREVIEW"
-readonly ACTION_INFO="$ACTION_HIDE_COVER+execute({ key_hook n | main_song_info; } <`tty` 1>&2)+$ACTION_UPDATE_PREVIEW"
+# key_hook n # -> print n on executing a command, read a key -> redraw info
+readonly ACTION_INFO="$ACTION_HIDE_COVER+execute({ key_hook n | Info::main; } <`tty` 1>&2)+$ACTION_UPDATE_PREVIEW"
